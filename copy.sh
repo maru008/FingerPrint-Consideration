@@ -1,0 +1,2 @@
+scp /Users/naokiyoshimaru/Desktop/pro-FingerPrint-AE/data/hidden_vec_fingreprint_8212.pickle miluser@192.168.100.67:/home/miluser/yoshimaru_env/FlavorGraph/src8298/input
+scp miluser@192.168.100.67:/home/miluser/yoshimaru_env/FlavorGraph/src_Metapath2vec+NPMI_8298/input/node2fp_8212.pickle /Users/naokiyoshimaru/Desktop/pro-FingerPrint-AE/data
