@@ -1,11 +1,33 @@
-import pytorch_lightning as pl
+from AutoEncoder import My_Module
+from AutoEncoder import train
+import torch
+import pickle
+import matplotlib.pyplot as plt
+import pandas as pd
 
-from AutoEncoder import LitAutoEncoder,MNISTDataModule,ImageSampler
+input_size = 881
+net = My_Module(input_size)
+criterion = torch.nn.MSELoss()
+optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
 
-dm = MNISTDataModule(batch_size=32, data_dir="/data/MNIST/")
-model = LitAutoEncoder()
+EPOCHS = 100
+hidden_fingreprint_data,output_and_label, losses = train(net, criterion, optimizer, EPOCHS, trainloader)
 
-trainer = pl.Trainer(
-    max_epochs=10, log_every_n_steps=1, gpus=1, callbacks=[ImageSampler()]
-)
-trainer.fit(model, dm)
+
+
+
+node_data = pd.read_csv('../../data/nodes_8212.csv')
+
+all_hidden_fingreprint_data = {}
+
+for key_i in node_data["node_id"]:
+    if key_i in hidden_fingreprint_data.keys():
+        all_hidden_fingreprint_data[key_i] = hidden_fingreprint_data[key_i]
+    else:
+        all_hidden_fingreprint_data[key_i] = None
+        
+with open("../../data/hidden_vec_fingreprint_300.pickle",'wb') as f:
+     pickle.dump(all_hidden_fingreprint_data,f)
+     
+plt.plot(losses)
+plt.show()

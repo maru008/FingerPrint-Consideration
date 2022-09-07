@@ -1,13 +1,9 @@
-from copyreg import pickle
 import torch
-from torch.utils.data import DataLoader
-import torchvision
-from torchvision import transforms
-from torchvision.datasets import MNIST, CIFAR10  # CIFAR10もインポートしておく
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import pickle
+import pandas as pd
 
 class Encoder(torch.nn.Module):
     def __init__(self, input_size):
@@ -52,7 +48,7 @@ class AutoEncoder(torch.nn.Module):
 # trainset = MNIST('./data', train=True, transform=transform, download=True)
 # testset = MNIST('./data', train=False, transform=transform, download=True)
 
-with open("node2fp_revised_1120.pickle",'rb') as f:
+with open("../../data/node2fp_revised_1120.pickle",'rb') as f:
     fingreprint_data_all = pickle.load(f)
 
 print("all ingredient : ",len(fingreprint_data_all))
@@ -75,11 +71,11 @@ def train(net, criterion, optimizer, epochs, trainloader):
     output_and_label = []
     end_check = False
     hidden_dict = {}
-    for epoch in range(1, epochs+1):
-        print(f'epoch: {epoch}, ', end='')
+    for epoch in tqdm(range(1, epochs+1)):
+        # print(f'epoch: {epoch}, ', end='')
         running_loss = 0.0
         
-        if epoch == EPOCHS:
+        if epoch == epochs:
             end_check = True
 
         for counter, trainloader_i in enumerate(zip(trainloader.keys(),trainloader.values())):
@@ -100,23 +96,34 @@ def train(net, criterion, optimizer, epochs, trainloader):
             
         avg_loss = running_loss / counter
         losses.append(avg_loss)
-        print('loss:', avg_loss)
+        # print('loss:', avg_loss)
         output_and_label.append((output, vec_i))
     print('finished')
     
-    with open('hidden_vec_fingreprint.pickle','wb') as f:
-        pickle.dump(hidden_dict,f)
+    # with open('hidden_vec_fingreprint.pickle','wb') as f:
+    #     pickle.dump(hidden_dict,f)
     
-    return output_and_label, losses
+    return hidden_dict,output_and_label, losses
 
 input_size = 881
 net = AutoEncoder(input_size)
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=0.1)
 
-EPOCHS = 150
-output_and_label, losses = train(net, criterion, optimizer, EPOCHS, trainloader)
+EPOCHS = 100
+hidden_fingreprint_data,output_and_label, losses = train(net, criterion, optimizer, EPOCHS, trainloader)
+node_data = pd.read_csv('../../data/nodes_8212.csv')
 
+all_hidden_fingreprint_data = {}
 
+for key_i in node_data["node_id"]:
+    if key_i in hidden_fingreprint_data.keys():
+        all_hidden_fingreprint_data[key_i] = hidden_fingreprint_data[key_i]
+    else:
+        all_hidden_fingreprint_data[key_i] = None
+        
+with open("../../data/hidden_vec_fingreprint_300.pickle",'wb') as f:
+     pickle.dump(all_hidden_fingreprint_data,f)
+     
 plt.plot(losses)
 plt.show()

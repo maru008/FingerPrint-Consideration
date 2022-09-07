@@ -24,8 +24,8 @@ for dataL in datalist:
 chemi_node_id_data["Morgan_id_ls"] = MorganFP_ls
 
 set_all_MorganFP_ls = list(set(all_MorganFP_ls))
-
-print("全次元数:",len(set_all_MorganFP_ls))
+dim = len(set_all_MorganFP_ls)
+print("全次元数:",dim)
 # print(set_all_MorganFP_ls)
 
 node_data = pd.read_csv("../../data/nodes_8212.csv")
@@ -49,8 +49,7 @@ for node_id in FP_data.keys():
         Morgan2binary_dict[node_id] = binary_ls   
     else:
         Morgan2binary_dict[node_id] = FP_data[node_id]
-print(len(Morgan2binary_dict))
 
-with open("../../data/Morgan2binary_8212.pickle","wb") as f:
+with open(f"../../data/Morgan2binary_{dim}.pickle","wb") as f:
     pickle.dump(Morgan2binary_dict,f)
     
